@@ -1,0 +1,8 @@
+CREATE TABLE produtos (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    descricao VARCHAR(100) NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    peso DECIMAL(10,3) NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    canal ENUM('LF', 'EC', 'AMBOS') NOT NULL
+)
