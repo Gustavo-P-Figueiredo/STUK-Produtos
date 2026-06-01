@@ -1,0 +1,6 @@
+CREATE TABLE fornecedor (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    descricao VARCHAR(100) NOT NULL,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    cnpj varchar(14) NOT NULL
+    )
