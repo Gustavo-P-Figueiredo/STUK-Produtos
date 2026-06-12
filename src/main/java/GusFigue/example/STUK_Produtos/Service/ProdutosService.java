@@ -1,14 +1,15 @@
 package GusFigue.example.STUK_Produtos.Service;
 
 import GusFigue.example.STUK_Produtos.DTO.ProdutosDTO;
+import GusFigue.example.STUK_Produtos.Entity.Fornecedor;
 import GusFigue.example.STUK_Produtos.Entity.Produtos;
+import GusFigue.example.STUK_Produtos.Repository.FornecedorRepository;
 import GusFigue.example.STUK_Produtos.Repository.ProdutosRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProdutosService {
@@ -16,11 +17,29 @@ public class ProdutosService {
     @Autowired
     private ProdutosRepository produtosRepository;
 
-    public List<Produtos> listarProdutos() {
-        return produtosRepository.findAll();
+    @Autowired
+    private FornecedorRepository fornecedorRepository;
+
+    private ProdutosDTO toDTO(Produtos p) {
+        return new ProdutosDTO(
+                p.getID(),
+                p.getDescricao(),
+                p.getValor(),
+                p.getPeso(),
+                p.getAtivo(),
+                p.getCanal(),
+                p.getFornecedor_ID().getID()
+        );
+    }
+
+    public List<ProdutosDTO> listarProdutos() {
+        return produtosRepository.findAll().stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     public ProdutosDTO cadastrarProduto(ProdutosDTO dto) {
+
         Produtos produto = new Produtos();
 
         produto.setDescricao(dto.descricao());
@@ -29,55 +48,65 @@ public class ProdutosService {
         produto.setAtivo(dto.ativo());
         produto.setCanal(dto.canal());
 
-        Produtos salvo = produtosRepository.save(produto);
+        Fornecedor fornecedor = fornecedorRepository
+                .findById(dto.fornecedorId())
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Fornecedor não encontrado"
+                        ));
+        produto.setFornecedor_ID(fornecedor);
 
-        return new ProdutosDTO(
-                salvo.getID(),
-                salvo.getDescricao(),
-                salvo.getValor(),
-                salvo.getPeso(),
-                salvo.getAtivo(),
-                salvo.getCanal()
-        );
+        return toDTO(produtosRepository.save(produto));
     }
 
-    public Optional<Produtos> buscarProduto(Long ID) {
-        Produtos produto = (Produtos) produtosRepository.findById(ID)
-                .orElseThrow(() -> new EntityNotFoundException("produto não encontrado"));
-        return Optional.of(produto);
+    public ProdutosDTO buscarProduto(Long ID) {
+        return toDTO(produtosRepository.findById(ID)
+                .orElseThrow(() -> new EntityNotFoundException("produto não encontrado")));
+
     }
 
-    public Produtos deletarProdutos(Long ID) {
-        Produtos produtos = (Produtos) produtosRepository.findById(ID)
+    public ProdutosDTO deletarProdutos(Long ID) {
+        Produtos produto = produtosRepository.findById(ID)
                 .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
+
         produtosRepository.deleteById(ID);
-        return produtos;
+
+        return toDTO(produto);
     }
 
-    public Produtos atualizarProdutos(Long ID, ProdutosDTO dto) {
-        Produtos produtos = (Produtos) produtosRepository.findById(ID)
+    public ProdutosDTO atualizarProdutos(Long id, ProdutosDTO dto) {
+        Produtos produto = produtosRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
 
         if (dto.descricao() != null) {
-            produtos.setDescricao(dto.descricao());
+            produto.setDescricao(dto.descricao());
         }
 
         if (dto.valor() != null) {
-            produtos.setValor(dto.valor());
+            produto.setValor(dto.valor());
         }
 
         if (dto.peso() != null) {
-            produtos.setPeso(dto.peso());
+            produto.setPeso(dto.peso());
         }
 
         if (dto.ativo() != null) {
-            produtos.setAtivo(dto.ativo());
+            produto.setAtivo(dto.ativo());
         }
 
         if (dto.canal() != null) {
-            produtos.setCanal(dto.canal());
+            produto.setCanal(dto.canal());
         }
 
-        return produtosRepository.save(produtos);
+        if (dto.fornecedorId() != null) {
+            Fornecedor fornecedor = fornecedorRepository.findById(dto.fornecedorId())
+                    .orElseThrow(() -> new EntityNotFoundException("Fornecedor não encontrado"));
+            produto.setFornecedor_ID(fornecedor);
+        }
+
+        Produtos salvo = produtosRepository.save(produto);
+
+        return toDTO(salvo);
     }
+
 }
