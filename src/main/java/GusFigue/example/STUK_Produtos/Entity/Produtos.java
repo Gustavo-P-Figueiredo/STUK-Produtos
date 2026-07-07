@@ -19,7 +19,7 @@ public class Produtos {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
     private String descricao;
 
@@ -34,6 +34,7 @@ public class Produtos {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fornecedor_id")
-    private Fornecedor fornecedor_ID;
+    private Fornecedor fornecedor;
 
+    private Integer quantidadeEstoque;
 }

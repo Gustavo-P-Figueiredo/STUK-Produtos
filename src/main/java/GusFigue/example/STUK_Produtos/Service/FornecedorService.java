@@ -2,13 +2,14 @@ package GusFigue.example.STUK_Produtos.Service;
 
 import GusFigue.example.STUK_Produtos.DTO.FornecedorDTO;
 import GusFigue.example.STUK_Produtos.Entity.Fornecedor;
-import GusFigue.example.STUK_Produtos.Entity.Produtos;
 import GusFigue.example.STUK_Produtos.Repository.FornecedorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class FornecedorService {
@@ -18,21 +19,21 @@ public class FornecedorService {
 
     private FornecedorDTO toDTO(Fornecedor f) {
         return new FornecedorDTO(
-                f.getID(),
+                f.getId(),
                 f.getDescricao(),
                 f.getAtivo(),
                 f.getCnpj()
         );
     }
 
-    public List<FornecedorDTO> listarFornecedores() {
-        return fornecedorRepository.findAll().stream()
-                .map(this::toDTO)
-                .toList();
+    public Page<FornecedorDTO> listarFornecedores(int numeroPagina, int tamanho) {
+        Pageable pageable = PageRequest.of(numeroPagina, tamanho);
+        return fornecedorRepository.findAll(pageable)
+                .map(this::toDTO);
     }
 
-    public FornecedorDTO buscarFornecedorPorId(Long ID){
-        return toDTO(fornecedorRepository.findById(ID)
+    public FornecedorDTO buscarFornecedorPorId(Long id){
+        return toDTO(fornecedorRepository.findById(id)
                 .orElseThrow(() -> new  EntityNotFoundException("Fornecedor não encontrado")));
     }
 
@@ -46,17 +47,17 @@ public class FornecedorService {
         return toDTO(fornecedorRepository.save(fornecedor));
     }
 
-    public FornecedorDTO deletarPorId(Long ID) {
-        Fornecedor fornecedor = fornecedorRepository.findById(ID)
+    public FornecedorDTO deletarPorId(Long id) {
+        Fornecedor fornecedor = fornecedorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Fornecedor não encontrado"));
 
-         fornecedorRepository.deleteById(ID);
+         fornecedorRepository.deleteById(id);
 
         return toDTO(fornecedor);
     }
 
-    public FornecedorDTO atualizarFornecedor (Long ID, FornecedorDTO dto) {
-        Fornecedor fornecedor = fornecedorRepository.findById(ID)
+    public FornecedorDTO atualizarFornecedor (Long id, FornecedorDTO dto) {
+        Fornecedor fornecedor = fornecedorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Fornecedor não encontrado"));
 
         if (dto.descricao() != null) fornecedor.setDescricao(dto.descricao());

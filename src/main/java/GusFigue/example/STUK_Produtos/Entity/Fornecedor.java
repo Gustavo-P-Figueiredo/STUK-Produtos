@@ -18,7 +18,7 @@ public class Fornecedor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
     private String descricao;
 
@@ -26,6 +26,6 @@ public class Fornecedor {
 
     private String cnpj;
 
-    @OneToMany(mappedBy = "fornecedor_ID",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Produtos> produtosIds;
+    @OneToMany(mappedBy = "fornecedor",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Produtos> produtos;
 }

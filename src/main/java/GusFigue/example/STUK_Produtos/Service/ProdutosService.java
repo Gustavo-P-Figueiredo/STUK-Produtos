@@ -7,9 +7,10 @@ import GusFigue.example.STUK_Produtos.Repository.FornecedorRepository;
 import GusFigue.example.STUK_Produtos.Repository.ProdutosRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ProdutosService {
@@ -22,20 +23,21 @@ public class ProdutosService {
 
     private ProdutosDTO toDTO(Produtos p) {
         return new ProdutosDTO(
-                p.getID(),
+                p.getId(),
                 p.getDescricao(),
                 p.getValor(),
                 p.getPeso(),
                 p.getAtivo(),
                 p.getCanal(),
-                p.getFornecedor_ID().getID()
+                p.getFornecedor().getId()
         );
     }
 
-    public List<ProdutosDTO> listarProdutos() {
-        return produtosRepository.findAll().stream()
-                .map(this::toDTO)
-                .toList();
+    public Page<ProdutosDTO> listarProdutos(int numeroPagina, int tamanho) {
+        Pageable pageable = PageRequest.of(numeroPagina, tamanho);
+        return produtosRepository.findAll(pageable)
+                .map(this::toDTO);
+
     }
 
     public ProdutosDTO cadastrarProduto(ProdutosDTO dto) {
@@ -54,22 +56,22 @@ public class ProdutosService {
                         new EntityNotFoundException(
                                 "Fornecedor não encontrado"
                         ));
-        produto.setFornecedor_ID(fornecedor);
+        produto.setFornecedor(fornecedor);
 
         return toDTO(produtosRepository.save(produto));
     }
 
-    public ProdutosDTO buscarProduto(Long ID) {
-        return toDTO(produtosRepository.findById(ID)
+    public ProdutosDTO buscarProduto(Long id) {
+        return toDTO(produtosRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("produto não encontrado")));
 
     }
 
-    public ProdutosDTO deletarProdutos(Long ID) {
-        Produtos produto = produtosRepository.findById(ID)
+    public ProdutosDTO deletarProdutos(Long id) {
+        Produtos produto = produtosRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado"));
 
-        produtosRepository.deleteById(ID);
+        produtosRepository.deleteById(id);
 
         return toDTO(produto);
     }
@@ -101,7 +103,7 @@ public class ProdutosService {
         if (dto.fornecedorId() != null) {
             Fornecedor fornecedor = fornecedorRepository.findById(dto.fornecedorId())
                     .orElseThrow(() -> new EntityNotFoundException("Fornecedor não encontrado"));
-            produto.setFornecedor_ID(fornecedor);
+            produto.setFornecedor(fornecedor);
         }
 
         Produtos salvo = produtosRepository.save(produto);

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 
-public record ProdutosDTO(Long ID,
+public record ProdutosDTO(Long id,
                           @NotBlank(message = "Informe uma descrição")
                           String descricao,
 
